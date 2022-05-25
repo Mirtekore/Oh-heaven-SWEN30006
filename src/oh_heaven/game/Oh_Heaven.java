@@ -4,6 +4,8 @@ package oh_heaven.game;
 
 import ch.aplu.jcardgame.*;
 import ch.aplu.jgamegrid.*;
+import oh_heaven.utility.PropertiesLoader;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.util.*;
@@ -12,13 +14,15 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class Oh_Heaven extends CardGame {
 
-	static public final int seed = 30006;
+	private Properties properties;
+	public final int nbPlayers = 4;
+	public final int nbStartCards;
+	public final int nbRounds;
+	private boolean enforceRules;
+	static public int seed;
 	static final Random random = new Random(seed);
 
 	private final String version = "1.0";
-	public final int nbPlayers = 4;
-	public final int nbStartCards = 13;
-	public final int nbRounds = 3;
 	public final int madeBidBonus = 10;
 	private final int handWidth = 400;
 	private final int trickWidth = 40;
@@ -43,8 +47,6 @@ public class Oh_Heaven extends CardGame {
 	private Hand[] hands;
 	private Location hideLocation = new Location(-500, - 500);
 	private Location trumpsActorLocation = new Location(50, 50);
-	private boolean enforceRules=false;
-
 	public void setStatus(String string) { setStatusText(string); }
 
 	private int[] scores = new int[nbPlayers];
@@ -53,6 +55,7 @@ public class Oh_Heaven extends CardGame {
 
 	Font bigFont = new Font("Serif", Font.BOLD, 36);
 
+	/** Added into Player class already **/
 	private void initScore() {
 		for (int i = 0; i < nbPlayers; i++) {
 			// scores[i] = 0;
@@ -62,6 +65,7 @@ public class Oh_Heaven extends CardGame {
 		}
 	}
 
+	/** Added into Player class already **/
 	private void updateScore(int player) {
 		removeActor(scoreActors[player]);
 		String text = "[" + String.valueOf(scores[player]) + "]" + String.valueOf(tricks[player]) + "/" + String.valueOf(bids[player]);
@@ -69,12 +73,14 @@ public class Oh_Heaven extends CardGame {
 		addActor(scoreActors[player], scoreLocations[player]);
 	}
 
+	/** Added into Player class already **/
 	private void initScores() {
 		for (int i = 0; i < nbPlayers; i++) {
 			scores[i] = 0;
 		}
 	}
 
+	/** Added into Player class already **/
 	private void updateScores() {
 		for (int i = 0; i < nbPlayers; i++) {
 			scores[i] += tricks[i];
@@ -82,12 +88,14 @@ public class Oh_Heaven extends CardGame {
 		}
 	}
 
+	/** Added into Player class already **/
 	private void initTricks() {
 		for (int i = 0; i < nbPlayers; i++) {
 			tricks[i] = 0;
 		}
 	}
 
+	/** Bidding strategy can be changed and report MUST comment on it **/
 	private void initBids(Cards.Suit trumps, int nextPlayer) {
 		int total = 0;
 		for (int i = nextPlayer; i < nextPlayer + nbPlayers; i++) {
@@ -120,6 +128,7 @@ public class Oh_Heaven extends CardGame {
 			hands[i].sort(Hand.SortType.SUITPRIORITY, true);
 		}
 		// Set up human player for interaction
+		/** This part needs to do some if is human reading **/
 		CardListener cardListener = new CardAdapter()  // Human Player plays card
 		{
 			public void leftDoubleClicked(Card card) { selected = card; hands[0].setTouchEnabled(false); }
@@ -235,11 +244,29 @@ public class Oh_Heaven extends CardGame {
 		removeActor(trumpsActor);
 	}
 
-	public Oh_Heaven()
+	public Oh_Heaven(Properties properties)
 	{
 		super(700, 700, 30);
 		setTitle("Oh_Heaven (V" + version + ") Constructed for UofM SWEN30006 with JGameGrid (www.aplu.ch)");
 		setStatusText("Initializing...");
+		this.properties = properties;
+		nbRounds =
+				(properties.getProperty("rounds") == null)
+						? 2
+						: Integer.parseInt(properties.getProperty("rounds"));
+
+		nbStartCards =
+				(properties.getProperty("nbStartCards") == null)
+						? 13
+						: Integer.parseInt(properties.getProperty("nbStartCards"));
+
+		seed =
+				(properties.getProperty("seed") == null)
+						? 30006
+						: Integer.parseInt(properties.getProperty("seed"));
+
+		enforceRules =
+				properties.getProperty("enforceRules") != null && Boolean.parseBoolean(properties.getProperty("enforceRules"));
 		initScores();
 		initScore();
 		for (int i=0; i <nbRounds; i++) {
@@ -272,11 +299,11 @@ public class Oh_Heaven extends CardGame {
 		// System.out.println("Working Directory = " + System.getProperty("user.dir"));
 		final Properties properties;
 		if (args == null || args.length == 0) {
-			//  properties = PropertiesLoader.loadPropertiesFile(null);
+			properties = PropertiesLoader.loadPropertiesFile(null);
 		} else {
-			//      properties = PropertiesLoader.loadPropertiesFile(args[0]);
+			properties = PropertiesLoader.loadPropertiesFile(args[0]);
 		}
-		new Oh_Heaven();
+		new Oh_Heaven(properties);
 	}
 
 }
