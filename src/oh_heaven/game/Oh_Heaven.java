@@ -11,60 +11,9 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class Oh_Heaven extends CardGame {
-	
-  public enum Suit
-  {
-    SPADES, HEARTS, DIAMONDS, CLUBS
-  }
-
-  public enum Rank
-  {
-    // Reverse order of rank importance (see rankGreater() below)
-	// Order of cards is tied to card images
-	ACE, KING, QUEEN, JACK, TEN, NINE, EIGHT, SEVEN, SIX, FIVE, FOUR, THREE, TWO
-  }
-  
-  final String trumpImage[] = {"bigspade.gif","bigheart.gif","bigdiamond.gif","bigclub.gif"};
 
   static public final int seed = 30006;
   static final Random random = new Random(seed);
-  
-  // return random Enum value
-  public static <T extends Enum<?>> T randomEnum(Class<T> clazz){
-      int x = random.nextInt(clazz.getEnumConstants().length);
-      return clazz.getEnumConstants()[x];
-  }
-
-  // return random Card from Hand
-  public static Card randomCard(Hand hand){
-      int x = random.nextInt(hand.getNumberOfCards());
-      return hand.get(x);
-  }
- 
-  // return random Card from ArrayList
-  public static Card randomCard(ArrayList<Card> list){
-      int x = random.nextInt(list.size());
-      return list.get(x);
-  }
-  
-  private void dealingOut(Hand[] hands, int nbPlayers, int nbCardsPerPlayer) {
-	  Hand pack = deck.toHand(false);
-	  // pack.setView(Oh_Heaven.this, new RowLayout(hideLocation, 0));
-	  for (int i = 0; i < nbCardsPerPlayer; i++) {
-		  for (int j=0; j < nbPlayers; j++) {
-			  if (pack.isEmpty()) return;
-			  Card dealt = randomCard(pack);
-		      // System.out.println("Cards = " + dealt);
-		      dealt.removeFromHand(false);
-		      hands[j].insert(dealt, false);
-			  // dealt.transfer(hands[j], true);
-		  }
-	  }
-  }
-  
-  public boolean rankGreater(Card card1, Card card2) {
-	  return card1.getRankId() < card2.getRankId(); // Warning: Reverse rank order of cards (see comment on enum)
-  }
 	 
   private final String version = "1.0";
   public final int nbPlayers = 4;
@@ -73,7 +22,7 @@ public class Oh_Heaven extends CardGame {
   public final int madeBidBonus = 10;
   private final int handWidth = 400;
   private final int trickWidth = 40;
-  private final Deck deck = new Deck(Suit.values(), Rank.values(), "cover");
+
   private final Location[] handLocations = {
 			  new Location(350, 625),
 			  new Location(75, 350),
@@ -139,7 +88,7 @@ private void initTricks() {
 	 }
 }
 
-private void initBids(Suit trumps, int nextPlayer) {
+private void initBids(Cards.Suit trumps, int nextPlayer) {
 	int total = 0;
 	for (int i = nextPlayer; i < nextPlayer + nbPlayers; i++) {
 		 int iP = i % nbPlayers;
@@ -164,9 +113,9 @@ private Card selected;
 private void initRound() {
 		hands = new Hand[nbPlayers];
 		for (int i = 0; i < nbPlayers; i++) {
-			   hands[i] = new Hand(deck);
+			   hands[i] = new Hand(Cards.getDeck());
 		}
-		dealingOut(hands, nbPlayers, nbStartCards);
+		Cards.dealingOut(hands, nbPlayers, nbStartCards);
 		 for (int i = 0; i < nbPlayers; i++) {
 			   hands[i].sort(Hand.SortType.SUITPRIORITY, true);
 		 }
@@ -193,20 +142,20 @@ private void initRound() {
 
 private void playRound() {
 	// Select and display trump suit
-		final Suit trumps = randomEnum(Suit.class);
-		final Actor trumpsActor = new Actor("sprites/"+trumpImage[trumps.ordinal()]);
+		final Cards.Suit trumps = Cards.randomEnum(Cards.Suit.class);
+		final Actor trumpsActor = new Actor("sprites/"+(Cards.trumpImage[trumps.ordinal()]));
 	    addActor(trumpsActor, trumpsActorLocation);
 	// End trump suit
 	Hand trick;
 	int winner;
 	Card winningCard;
-	Suit lead;
+	Cards.Suit lead;
 	int nextPlayer = random.nextInt(nbPlayers); // randomly select player to lead for this round
 	initBids(trumps, nextPlayer);
     // initScore();
     for (int i = 0; i < nbPlayers; i++) updateScore(i);
 	for (int i = 0; i < nbStartCards; i++) {
-		trick = new Hand(deck);
+		trick = new Hand(Cards.getDeck());
     	selected = null;
     	// if (false) {
         if (0 == nextPlayer) {  // Select lead depending on player type
@@ -216,14 +165,14 @@ private void playRound() {
         } else {
     		setStatusText("Player " + nextPlayer + " thinking...");
             delay(thinkingTime);
-            selected = randomCard(hands[nextPlayer]);
+            selected = Cards.randomCard(hands[nextPlayer]);
         }
         // Lead with selected card
 	        trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
 			trick.draw();
 			selected.setVerso(false);
 			// No restrictions on the card being lead
-			lead = (Suit) selected.getSuit();
+			lead = (Cards.Suit) selected.getSuit();
 			selected.transfer(trick, true); // transfer to trick (includes graphic effect)
 			winner = nextPlayer;
 			winningCard = selected;
@@ -239,7 +188,7 @@ private void playRound() {
 	        } else {
 		        setStatusText("Player " + nextPlayer + " thinking...");
 		        delay(thinkingTime);
-		        selected = randomCard(hands[nextPlayer]);
+		        selected = Cards.randomCard(hands[nextPlayer]);
 	        }
 	        // Follow with selected card
 		        trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
@@ -266,7 +215,7 @@ private void playRound() {
 				 // System.out.println("winning: suit = " + winningCard.getSuit() + ", rank = " + (13 - winningCard.getRankId()));
 				 // System.out.println(" played: suit = " +    selected.getSuit() + ", rank = " + (13 -    selected.getRankId()));
 				 if ( // beat current winner with higher card
-					 (selected.getSuit() == winningCard.getSuit() && rankGreater(selected, winningCard)) ||
+					 (selected.getSuit() == winningCard.getSuit() && Cards.rankGreater(selected, winningCard)) ||
 					  // trumped when non-trump was winning
 					 (selected.getSuit() == trumps && winningCard.getSuit() != trumps)) {
 					 System.out.println("NEW WINNER");
