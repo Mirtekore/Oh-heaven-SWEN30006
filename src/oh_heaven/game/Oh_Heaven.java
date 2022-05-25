@@ -4,6 +4,8 @@ package oh_heaven.game;
 
 import ch.aplu.jcardgame.*;
 import ch.aplu.jgamegrid.*;
+import oh_heaven.utility.PropertiesLoader;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.util.*;
@@ -11,42 +13,49 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class Oh_Heaven extends CardGame {
-	
+
+	private Properties properties;
+	public final int nbPlayers = 4;
+	public final int nbStartCards;
+	public final int nbRounds;
+	private boolean enforceRules;
+	static public int seed;
+	static final Random random = new Random(seed);
+
+
   public enum Suit
   {
-    SPADES, HEARTS, DIAMONDS, CLUBS
+	SPADES, HEARTS, DIAMONDS, CLUBS
   }
 
   public enum Rank
   {
-    // Reverse order of rank importance (see rankGreater() below)
+	// Reverse order of rank importance (see rankGreater() below)
 	// Order of cards is tied to card images
 	ACE, KING, QUEEN, JACK, TEN, NINE, EIGHT, SEVEN, SIX, FIVE, FOUR, THREE, TWO
   }
-  
+
   final String trumpImage[] = {"bigspade.gif","bigheart.gif","bigdiamond.gif","bigclub.gif"};
 
-  static public final int seed = 30006;
-  static final Random random = new Random(seed);
-  
+
   // return random Enum value
   public static <T extends Enum<?>> T randomEnum(Class<T> clazz){
-      int x = random.nextInt(clazz.getEnumConstants().length);
-      return clazz.getEnumConstants()[x];
+	  int x = random.nextInt(clazz.getEnumConstants().length);
+	  return clazz.getEnumConstants()[x];
   }
 
   // return random Card from Hand
   public static Card randomCard(Hand hand){
-      int x = random.nextInt(hand.getNumberOfCards());
-      return hand.get(x);
+	  int x = random.nextInt(hand.getNumberOfCards());
+	  return hand.get(x);
   }
- 
+
   // return random Card from ArrayList
   public static Card randomCard(ArrayList<Card> list){
-      int x = random.nextInt(list.size());
-      return list.get(x);
+	  int x = random.nextInt(list.size());
+	  return list.get(x);
   }
-  
+
   private void dealingOut(Hand[] hands, int nbPlayers, int nbCardsPerPlayer) {
 	  Hand pack = deck.toHand(false);
 	  // pack.setView(Oh_Heaven.this, new RowLayout(hideLocation, 0));
@@ -54,22 +63,19 @@ public class Oh_Heaven extends CardGame {
 		  for (int j=0; j < nbPlayers; j++) {
 			  if (pack.isEmpty()) return;
 			  Card dealt = randomCard(pack);
-		      // System.out.println("Cards = " + dealt);
-		      dealt.removeFromHand(false);
-		      hands[j].insert(dealt, false);
+			  // System.out.println("Cards = " + dealt);
+			  dealt.removeFromHand(false);
+			  hands[j].insert(dealt, false);
 			  // dealt.transfer(hands[j], true);
 		  }
 	  }
   }
-  
+
   public boolean rankGreater(Card card1, Card card2) {
 	  return card1.getRankId() < card2.getRankId(); // Warning: Reverse rank order of cards (see comment on enum)
   }
-	 
+
   private final String version = "1.0";
-  public final int nbPlayers = 4;
-  public final int nbStartCards = 13;
-  public final int nbRounds = 3;
   public final int madeBidBonus = 10;
   private final int handWidth = 400;
   private final int trickWidth = 40;
@@ -94,16 +100,16 @@ public class Oh_Heaven extends CardGame {
   private Hand[] hands;
   private Location hideLocation = new Location(-500, - 500);
   private Location trumpsActorLocation = new Location(50, 50);
-  private boolean enforceRules=false;
 
   public void setStatus(String string) { setStatusText(string); }
-  
+
 private int[] scores = new int[nbPlayers];
 private int[] tricks = new int[nbPlayers];
 private int[] bids = new int[nbPlayers];
 
 Font bigFont = new Font("Serif", Font.BOLD, 36);
 
+/** Added into Player class already **/
 private void initScore() {
 	 for (int i = 0; i < nbPlayers; i++) {
 		 // scores[i] = 0;
@@ -113,6 +119,8 @@ private void initScore() {
 	 }
   }
 
+
+/** Added into Player class already **/
 private void updateScore(int player) {
 	removeActor(scoreActors[player]);
 	String text = "[" + String.valueOf(scores[player]) + "]" + String.valueOf(tricks[player]) + "/" + String.valueOf(bids[player]);
@@ -120,12 +128,14 @@ private void updateScore(int player) {
 	addActor(scoreActors[player], scoreLocations[player]);
 }
 
+/** Added into Player class already **/
 private void initScores() {
 	 for (int i = 0; i < nbPlayers; i++) {
 		 scores[i] = 0;
 	 }
 }
 
+/** Added into Player class already **/
 private void updateScores() {
 	 for (int i = 0; i < nbPlayers; i++) {
 		 scores[i] += tricks[i];
@@ -133,12 +143,14 @@ private void updateScores() {
 	 }
 }
 
+/** Added into Player class already **/
 private void initTricks() {
 	 for (int i = 0; i < nbPlayers; i++) {
 		 tricks[i] = 0;
 	 }
 }
 
+/** Bidding strategy can be changed and report MUST comment on it **/
 private void initBids(Suit trumps, int nextPlayer) {
 	int total = 0;
 	for (int i = nextPlayer; i < nextPlayer + nbPlayers; i++) {
@@ -171,31 +183,32 @@ private void initRound() {
 			   hands[i].sort(Hand.SortType.SUITPRIORITY, true);
 		 }
 		 // Set up human player for interaction
+		/** This part needs to do some if is human reading **/
 		CardListener cardListener = new CardAdapter()  // Human Player plays card
-			    {
-			      public void leftDoubleClicked(Card card) { selected = card; hands[0].setTouchEnabled(false); }
-			    };
+				{
+				  public void leftDoubleClicked(Card card) { selected = card; hands[0].setTouchEnabled(false); }
+				};
 		hands[0].addCardListener(cardListener);
 		 // graphics
-	    RowLayout[] layouts = new RowLayout[nbPlayers];
-	    for (int i = 0; i < nbPlayers; i++) {
-	      layouts[i] = new RowLayout(handLocations[i], handWidth);
-	      layouts[i].setRotationAngle(90 * i);
-	      // layouts[i].setStepDelay(10);
-	      hands[i].setView(this, layouts[i]);
-	      hands[i].setTargetArea(new TargetArea(trickLocation));
-	      hands[i].draw();
-	    }
+		RowLayout[] layouts = new RowLayout[nbPlayers];
+		for (int i = 0; i < nbPlayers; i++) {
+		  layouts[i] = new RowLayout(handLocations[i], handWidth);
+		  layouts[i].setRotationAngle(90 * i);
+		  // layouts[i].setStepDelay(10);
+		  hands[i].setView(this, layouts[i]);
+		  hands[i].setTargetArea(new TargetArea(trickLocation));
+		  hands[i].draw();
+		}
 //	    for (int i = 1; i < nbPlayers; i++) // This code can be used to visually hide the cards in a hand (make them face down)
 //	      hands[i].setVerso(true);			// You do not need to use or change this code.
-	    // End graphics
+		// End graphics
  }
 
 private void playRound() {
 	// Select and display trump suit
 		final Suit trumps = randomEnum(Suit.class);
 		final Actor trumpsActor = new Actor("sprites/"+trumpImage[trumps.ordinal()]);
-	    addActor(trumpsActor, trumpsActorLocation);
+		addActor(trumpsActor, trumpsActorLocation);
 	// End trump suit
 	Hand trick;
 	int winner;
@@ -203,23 +216,23 @@ private void playRound() {
 	Suit lead;
 	int nextPlayer = random.nextInt(nbPlayers); // randomly select player to lead for this round
 	initBids(trumps, nextPlayer);
-    // initScore();
-    for (int i = 0; i < nbPlayers; i++) updateScore(i);
+	// initScore();
+	for (int i = 0; i < nbPlayers; i++) updateScore(i);
 	for (int i = 0; i < nbStartCards; i++) {
 		trick = new Hand(deck);
-    	selected = null;
-    	// if (false) {
-        if (0 == nextPlayer) {  // Select lead depending on player type
-    		hands[0].setTouchEnabled(true);
-    		setStatus("Player 0 double-click on card to lead.");
-    		while (null == selected) delay(100);
-        } else {
-    		setStatusText("Player " + nextPlayer + " thinking...");
-            delay(thinkingTime);
-            selected = randomCard(hands[nextPlayer]);
-        }
-        // Lead with selected card
-	        trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
+		selected = null;
+		// if (false) {
+		if (0 == nextPlayer) {  // Select lead depending on player type
+			hands[0].setTouchEnabled(true);
+			setStatus("Player 0 double-click on card to lead.");
+			while (null == selected) delay(100);
+		} else {
+			setStatusText("Player " + nextPlayer + " thinking...");
+			delay(thinkingTime);
+			selected = randomCard(hands[nextPlayer]);
+		}
+		// Lead with selected card
+			trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
 			trick.draw();
 			selected.setVerso(false);
 			// No restrictions on the card being lead
@@ -232,17 +245,17 @@ private void playRound() {
 			if (++nextPlayer >= nbPlayers) nextPlayer = 0;  // From last back to first
 			selected = null;
 			// if (false) {
-	        if (0 == nextPlayer) {
-	    		hands[0].setTouchEnabled(true);
-	    		setStatus("Player 0 double-click on card to follow.");
-	    		while (null == selected) delay(100);
-	        } else {
-		        setStatusText("Player " + nextPlayer + " thinking...");
-		        delay(thinkingTime);
-		        selected = randomCard(hands[nextPlayer]);
-	        }
-	        // Follow with selected card
-		        trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
+			if (0 == nextPlayer) {
+				hands[0].setTouchEnabled(true);
+				setStatus("Player 0 double-click on card to follow.");
+				while (null == selected) delay(100);
+			} else {
+				setStatusText("Player " + nextPlayer + " thinking...");
+				delay(thinkingTime);
+				selected = randomCard(hands[nextPlayer]);
+			}
+			// Follow with selected card
+				trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
 				trick.draw();
 				selected.setVerso(false);  // In case it is upside down
 				// Check: Following card must follow suit if possible
@@ -250,14 +263,14 @@ private void playRound() {
 						 // Rule violation
 						 String violation = "Follow rule broken by player " + nextPlayer + " attempting to play " + selected;
 						 System.out.println(violation);
-						 if (enforceRules) 
+						 if (enforceRules)
 							 try {
 								 throw(new BrokeRuleException(violation));
 								} catch (BrokeRuleException e) {
 									e.printStackTrace();
 									System.out.println("A cheating player spoiled the game!");
 									System.exit(0);
-								}  
+								}
 					 }
 				// End Check
 				 selected.transfer(trick, true); // transfer to trick (includes graphic effect)
@@ -277,7 +290,7 @@ private void playRound() {
 		}
 		delay(600);
 		trick.setView(this, new RowLayout(hideLocation, 0));
-		trick.draw();		
+		trick.draw();
 		nextPlayer = winner;
 		setStatusText("Player " + nextPlayer + " wins trick.");
 		tricks[nextPlayer]++;
@@ -286,36 +299,56 @@ private void playRound() {
 	removeActor(trumpsActor);
 }
 
-  public Oh_Heaven()
+  public Oh_Heaven(Properties properties)
   {
 	super(700, 700, 30);
-    setTitle("Oh_Heaven (V" + version + ") Constructed for UofM SWEN30006 with JGameGrid (www.aplu.ch)");
-    setStatusText("Initializing...");
-    initScores();
-    initScore();
-    for (int i=0; i <nbRounds; i++) {
-      initTricks();
-      initRound();
-      playRound();
-      updateScores();
-    };
-    for (int i=0; i <nbPlayers; i++) updateScore(i);
-    int maxScore = 0;
-    for (int i = 0; i <nbPlayers; i++) if (scores[i] > maxScore) maxScore = scores[i];
-    Set <Integer> winners = new HashSet<Integer>();
-    for (int i = 0; i <nbPlayers; i++) if (scores[i] == maxScore) winners.add(i);
-    String winText;
-    if (winners.size() == 1) {
-    	winText = "Game over. Winner is player: " +
-    			winners.iterator().next();
-    }
-    else {
-    	winText = "Game Over. Drawn winners are players: " +
-    			String.join(", ", winners.stream().map(String::valueOf).collect(Collectors.toSet()));
-    }
-    addActor(new Actor("sprites/gameover.gif"), textLocation);
-    setStatusText(winText);
-    refresh();
+	setTitle("Oh_Heaven (V" + version + ") Constructed for UofM SWEN30006 with JGameGrid (www.aplu.ch)");
+	setStatusText("Initializing...");
+
+	  this.properties = properties;
+	  nbRounds =
+			  (properties.getProperty("rounds") == null)
+					  ? 2
+					  : Integer.parseInt(properties.getProperty("rounds"));
+
+	  nbStartCards =
+			  (properties.getProperty("nbStartCards") == null)
+					  ? 13
+					  : Integer.parseInt(properties.getProperty("nbStartCards"));
+
+	  seed =
+			  (properties.getProperty("seed") == null)
+					  ? 30006
+					  : Integer.parseInt(properties.getProperty("seed"));
+
+	  enforceRules =
+			  properties.getProperty("enforceRules") != null && Boolean.parseBoolean(properties.getProperty("enforceRules"));
+
+	initScores();
+	initScore();
+	for (int i=0; i <nbRounds; i++) {
+	  initTricks();
+	  initRound();
+	  playRound();
+	  updateScores();
+	};
+	for (int i=0; i <nbPlayers; i++) updateScore(i);
+	int maxScore = 0;
+	for (int i = 0; i <nbPlayers; i++) if (scores[i] > maxScore) maxScore = scores[i];
+	Set <Integer> winners = new HashSet<Integer>();
+	for (int i = 0; i <nbPlayers; i++) if (scores[i] == maxScore) winners.add(i);
+	String winText;
+	if (winners.size() == 1) {
+		winText = "Game over. Winner is player: " +
+				winners.iterator().next();
+	}
+	else {
+		winText = "Game Over. Drawn winners are players: " +
+				String.join(", ", winners.stream().map(String::valueOf).collect(Collectors.toSet()));
+	}
+	addActor(new Actor("sprites/gameover.gif"), textLocation);
+	setStatusText(winText);
+	refresh();
   }
 
   public static void main(String[] args)
@@ -323,11 +356,11 @@ private void playRound() {
 	// System.out.println("Working Directory = " + System.getProperty("user.dir"));
 	final Properties properties;
 	if (args == null || args.length == 0) {
-	//  properties = PropertiesLoader.loadPropertiesFile(null);
+		properties = PropertiesLoader.loadPropertiesFile(null);
 	} else {
-	//      properties = PropertiesLoader.loadPropertiesFile(args[0]);
+		properties = PropertiesLoader.loadPropertiesFile(args[0]);
 	}
-    new Oh_Heaven();
+	new Oh_Heaven(properties);
   }
 
 }
