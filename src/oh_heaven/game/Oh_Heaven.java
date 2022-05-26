@@ -153,9 +153,11 @@ public class Oh_Heaven extends CardGame {
 
 	private void initRound2() {
 		int counter = 0;
-		for (Player p: players) {
+		for (Player p : players) {
 			p.setHand(new Hand(Cards.getDeck()));
-			Cards.dealingOut2(p.getHand(),nbStartCards);
+		}
+		Cards.dealingOut2(players, nbStartCards);
+		for (Player p : players) {
 			p.getHand().sort(Hand.SortType.SUITPRIORITY, true);
 
 			// human reading part
@@ -164,7 +166,8 @@ public class Oh_Heaven extends CardGame {
 			{
 				public void leftDoubleClicked(Card card) {
 					selected = card;
-					players.get(0).getHand().setTouchEnabled(false); }
+					players.get(0).getHand().setTouchEnabled(false);
+				}
 			};
 			players.get(0).getHand().addCardListener(cardListener);
 
@@ -209,7 +212,7 @@ public class Oh_Heaven extends CardGame {
 			trick = new Hand(Cards.getDeck());
 			selected = null;
 			System.out.println(players.get(nextPlayer).getPlayerType());
-			if (players.get(nextPlayer).getPlayerType() == "human") {  // Select lead depending on player type
+			if (players.get(nextPlayer).getPlayerType().equals("human")) {  // Select lead depending on player type
 				players.get(nextPlayer).getHand().setTouchEnabled(true);
 				setStatus("Player " + nextPlayer + " double-click on card to lead.");
 				while (null == selected) delay(100);
@@ -232,7 +235,7 @@ public class Oh_Heaven extends CardGame {
 				if (++nextPlayer >= nbPlayers) nextPlayer = 0;  // From last back to first
 				selected = null;
 				// if (false) {
-				if (players.get(nextPlayer).getPlayerType() == "human") {  // Select lead depending on player type
+				if (players.get(nextPlayer).getPlayerType().equals("human")) {  // Select lead depending on player type
 					players.get(nextPlayer).getHand().setTouchEnabled(true);
 					setStatus("Player " + nextPlayer + " double-click on card to lead.");
 					while (null == selected) delay(100);

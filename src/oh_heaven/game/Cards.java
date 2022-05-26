@@ -1,6 +1,7 @@
 package oh_heaven.game;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ch.aplu.jcardgame.Card;
 import ch.aplu.jcardgame.Deck;
@@ -67,18 +68,18 @@ public class Cards {
 		  }
 	  }
 
-	public static void dealingOut2(Hand hand, int nbCardsPerPlayer) {
+	public static void dealingOut2(List<Player> players, int nbCardsPerPlayer) {
 		Hand pack = deck.toHand(false);
 		// pack.setView(Oh_Heaven.this, new RowLayout(hideLocation, 0));
 		for (int i = 0; i < nbCardsPerPlayer; i++) {
-
+			for (Player p: players) {
 				if (pack.isEmpty()) return;
 				Card dealt = randomCard(pack);
 				// System.out.println("Cards = " + dealt);
 				dealt.removeFromHand(false);
-				hand.insert(dealt, false);
+				p.getHand().insert(dealt, false);
 				// dealt.transfer(hands[j], true);
-
+			}
 		}
 	}
 }
