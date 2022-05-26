@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-public class Player{
+public class Player implements MyListener{
     private Hand hand;
     public final int madeBidBonus = 10;
     private final int nbStartCards = 13;
@@ -20,6 +20,11 @@ public class Player{
     private Actor scoreActor;
     private String playerType;
     private int playerId;
+
+    //add by Qinglin
+    private Cards.Suit curtrumps;
+    private Cards.Suit curlead;
+    private List<Card> curTrickCards;
 
 
     Font bigFont = new Font("Serif", Font.BOLD, 36);
@@ -37,6 +42,7 @@ public class Player{
         trick = 0;
         score = 0;
         bid = 0;
+        this.curTrickCards = new ArrayList<>();
     }
 
     public int makeBid() {
@@ -95,8 +101,36 @@ public class Player{
         this.hand = hand;
     }
 
+    @Override
+    public void update(String mode, String feature, Object arg){
+//        System.out.println(mode+"  "+feature);
+        if(mode.equals("add")){
+            switch (feature){
+                case "trickCard":
+                    this.curTrickCards.add((Card) arg);
+                    break;
+                case "trumps":
+                    this.curtrumps = (Cards.Suit) arg;
+                    break;
+                case "lead":
+                    this.curlead = (Cards.Suit) arg;
+                    break;
+            }
+        }else if(mode.equals("delete")){
+            switch (feature){
+                case "trickCard":
+                    this.curTrickCards = new ArrayList<>();
+                    break;
+                case "trumps":
+                    this.curtrumps = null;
+                    break;
+                case "lead":
+                    this.curlead = null;
+                    break;
+            }
+        }
 
-
+    }
 
     //public abstract void playCard();
 

@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
-public class Oh_Heaven extends CardGame {
+public class Oh_Heaven extends CardGame implements MyPublisher{
 
 	private Properties properties;
 	public final int nbPlayers = 4;
@@ -184,7 +184,7 @@ public class Oh_Heaven extends CardGame {
 		final Cards.Suit trumps = Cards.randomEnum(Cards.Suit.class);
 		final Actor trumpsActor = new Actor("sprites/"+(Cards.trumpImage[trumps.ordinal()]));
 		addActor(trumpsActor, trumpsActorLocation);
-
+		notifyPlayers("add","trumps",trumps);
 		Hand trick;
 		int winner;
 		Card winningCard;
@@ -225,6 +225,8 @@ public class Oh_Heaven extends CardGame {
 			trick.draw();
 			selected.setVerso(false);
 			lead = (Cards.Suit) selected.getSuit();
+			notifyPlayers("add","trikeCard",selected);
+			notifyPlayers("add","lead",lead);
 			selected.transfer(trick, true); // transfer to trick (includes graphic effect)
 			winner = nextPlayer;
 			winningCard = selected;
@@ -247,6 +249,7 @@ public class Oh_Heaven extends CardGame {
 				// Follow with selected card
 				trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
 				trick.draw();
+				notifyPlayers("add","trikeCard",selected);
 				selected.setVerso(false);  // In case it is upside down
 
 				// Check: Following card must follow suit if possible
@@ -290,7 +293,10 @@ public class Oh_Heaven extends CardGame {
 			String text = "[" + String.valueOf(players.get(nextPlayer).getScore()) + "]" + String.valueOf(players.get(nextPlayer).getTrick()) + "/" + String.valueOf(players.get(nextPlayer).getBid());
 			scoreActors[players.get(nextPlayer).getPlayerId()] = new TextActor(text, Color.WHITE, bgColor, bigFont);
 			addActor(scoreActors[players.get(nextPlayer).getPlayerId()], players.get(nextPlayer).getScoreLocation());
+			notifyPlayers("delete","trickCard",null);
+			notifyPlayers("delete","lead",null);
 		}
+		notifyPlayers("delete","trumps",null);
 		removeActor(trumpsActor);
 	}
 
@@ -457,6 +463,14 @@ public class Oh_Heaven extends CardGame {
 		addActor(new Actor("sprites/gameover.gif"), textLocation);
 		setStatusText(winText);
 		refresh();
+	}
+
+	/**	observer pattern**/
+	@Override
+	public void notifyPlayers(String mode, String feature, Object arg){
+		for(Player p:players){
+			p.update(mode, feature, arg);
+		}
 	}
 
 //	public Oh_Heaven(Properties properties)
