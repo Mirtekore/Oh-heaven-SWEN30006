@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-public class Player extends CardGame{
+public class Player{
     private Hand hand;
     public final int madeBidBonus = 10;
     private final int nbStartCards = 13;
@@ -21,15 +21,22 @@ public class Player extends CardGame{
     private String playerType;
     private int playerId;
 
+
     Font bigFont = new Font("Serif", Font.BOLD, 36);
 
-    
+
+    public void setTrick(int trick) {
+        this.trick = trick;
+    }
+
     public Player(int playerId, String playerType, Location scoreLocation, Location handLocation) {
         this.scoreLocation = scoreLocation;
         this.playerId = playerId;
         this.playerType = playerType;
         this.handLocation = handLocation;
-        trick = 0; // Was originally it's own method
+        trick = 0;
+        score = 0;
+        bid = 0;
     }
 
     public int makeBid() {
@@ -45,27 +52,50 @@ public class Player extends CardGame{
         }
     }
 
-    private void displayScore(int player) {
-        removeActor(scoreActor);
-        String text = "[" + String.valueOf(score) + "]" + String.valueOf(trick) + "/" + String.valueOf(bid);
-        scoreActor = new TextActor(text, Color.WHITE, bgColor, bigFont);
-        addActor(scoreActor, scoreLocation);
+    public int getTrick() {
+        return trick;
     }
 
-    private void updateScore() {
+    public int getBid() {
+        return bid;
+    }
+
+    public Location getScoreLocation() {
+        return scoreLocation;
+    }
+
+    public String getPlayerType() {
+        return playerType;
+    }
+
+    public void updateScore() {
         score += trick;
         if (trick == bid){
             score += madeBidBonus;
         }
     }
 
-
-    private void initScore() {
-        score = 0;
-        String text = "[" + String.valueOf(score) + "]" + String.valueOf(trick) + "/" + String.valueOf(bid);
-        scoreActor = new TextActor(text, Color.WHITE, bgColor, bigFont);
-        addActor(scoreActor, scoreLocation);
+    public void winTrick() {
+        trick++;
     }
+
+    public int getScore() {
+        return score;
+    }
+
+    public int getPlayerId() {
+        return playerId;
+    }
+
+    public Hand getHand() {
+        return hand;
+    }
+
+    public void setHand(Hand hand) {
+        this.hand = hand;
+    }
+
+
 
 
     //public abstract void playCard();

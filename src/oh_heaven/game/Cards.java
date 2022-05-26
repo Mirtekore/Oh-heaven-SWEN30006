@@ -66,4 +66,19 @@ public class Cards {
 			  }
 		  }
 	  }
+
+	public static void dealingOut2(Hand hand, int nbCardsPerPlayer) {
+		Hand pack = deck.toHand(false);
+		// pack.setView(Oh_Heaven.this, new RowLayout(hideLocation, 0));
+		for (int i = 0; i < nbCardsPerPlayer; i++) {
+
+				if (pack.isEmpty()) return;
+				Card dealt = randomCard(pack);
+				// System.out.println("Cards = " + dealt);
+				dealt.removeFromHand(false);
+				hand.insert(dealt, false);
+				// dealt.transfer(hands[j], true);
+
+		}
+	}
 }
