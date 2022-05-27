@@ -52,23 +52,8 @@ public class Cards {
 	  public static Deck getDeck() {
 		  return deck;
 	  }
-	  
-	  public static void dealingOut(Hand[] hands, int nbPlayers, int nbCardsPerPlayer) {
-		  Hand pack = deck.toHand(false);
-		  // pack.setView(Oh_Heaven.this, new RowLayout(hideLocation, 0));
-		  for (int i = 0; i < nbCardsPerPlayer; i++) {
-			  for (int j=0; j < nbPlayers; j++) {
-				  if (pack.isEmpty()) return;
-				  Card dealt = randomCard(pack);
-			      // System.out.println("Cards = " + dealt);
-			      dealt.removeFromHand(false);
-			      hands[j].insert(dealt, false);
-				  // dealt.transfer(hands[j], true);
-			  }
-		  }
-	  }
 
-	public static void dealingOut2(List<Player> players, int nbCardsPerPlayer) {
+	public static void dealingOut(List<Player> players, int nbCardsPerPlayer) {
 		Hand pack = deck.toHand(false);
 		// pack.setView(Oh_Heaven.this, new RowLayout(hideLocation, 0));
 		for (int i = 0; i < nbCardsPerPlayer; i++) {

@@ -7,7 +7,6 @@ import java.awt.Font;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 public class Player implements MyListener{
     private Hand hand;
     public final int madeBidBonus = 10;
@@ -45,6 +44,7 @@ public class Player implements MyListener{
         this.curTrickCards = new ArrayList<>();
     }
 
+    /** Bidding strategy can be changed and report MUST comment on it **/
     public int makeBid() {
         bid = nbStartCards / 4 + Oh_Heaven.random.nextInt(2);
         return bid;
