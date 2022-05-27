@@ -26,9 +26,6 @@ public class Player implements MyListener{
     private List<Card> curTrickCards;
 
 
-    Font bigFont = new Font("Serif", Font.BOLD, 36);
-
-
     public void setTrick(int trick) {
         this.trick = trick;
     }

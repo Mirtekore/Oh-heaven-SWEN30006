@@ -24,9 +24,17 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 	private List<Player> players;
 
 	private final String version = "1.0";
-	public final int madeBidBonus = 10;
 	private final int handWidth = 400;
 	private final int trickWidth = 40;
+	
+	/** Redundant variables from original code **/
+	public final int madeBidBonus = 10;
+	private Hand[] hands;
+	private int[] scores = new int[nbPlayers];
+	private int[] tricks = new int[nbPlayers];
+	private int[] bids = new int[nbPlayers];
+	
+
 
 	private final Location[] handLocations = {
 			new Location(350, 625),
@@ -45,18 +53,22 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 	private final Location trickLocation = new Location(350, 350);
 	private final Location textLocation = new Location(350, 450);
 	private final int thinkingTime = 2000;
-	private Hand[] hands;
 	private Location hideLocation = new Location(-500, - 500);
 	private Location trumpsActorLocation = new Location(50, 50);
 	public void setStatus(String string) { setStatusText(string); }
 
-	private int[] scores = new int[nbPlayers];
-	private int[] tricks = new int[nbPlayers];
-	private int[] bids = new int[nbPlayers];
-
 	Font bigFont = new Font("Serif", Font.BOLD, 36);
 
 	private Card selected;
+
+	private void displayScores() {
+		for (Player p: players) {
+			removeActor(scoreActors[p.getPlayerId()]);
+			String text = "[" + String.valueOf(p.getScore()) + "]" + String.valueOf(p.getTrick()) + "/" + String.valueOf(p.getBid());
+			scoreActors[p.getPlayerId()] = new TextActor(text, Color.WHITE, bgColor, bigFont);
+			addActor(scoreActors[p.getPlayerId()], p.getScoreLocation());
+		}
+	}
 
 	private void initRound() {
 		int counter = 0;
@@ -68,7 +80,7 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 			p.getHand().sort(Hand.SortType.SUITPRIORITY, true);
 
 			// human reading part
-
+			/** Code will have to change to add listeners if is human player **/
 			CardListener cardListener = new CardAdapter()  // Human Player plays card
 			{
 				public void leftDoubleClicked(Card card) {
@@ -98,7 +110,7 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		Cards.Suit lead;
 		int nextPlayer = random.nextInt(nbPlayers); // randomly select player to lead for this round
 
-		// Similar to initBids()
+		/** Bidding phase **/
 		int total = 0;
 		for (int i = nextPlayer; i < nextPlayer + nbPlayers; i++) {
 			total += players.get(i % nbPlayers).makeBid();
@@ -106,15 +118,9 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		if (total == nbStartCards) {  // Force last bid so not every bid possible
 			players.get((nextPlayer + nbPlayers) % nbPlayers).forceBid();
 		}
-		// initBid end
+		displayScores();
 
-		for (Player p: players) {
-			removeActor(scoreActors[p.getPlayerId()]);
-			String text = "[" + String.valueOf(p.getScore()) + "]" + String.valueOf(p.getTrick()) + "/" + String.valueOf(p.getBid());
-			scoreActors[p.getPlayerId()] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-			addActor(scoreActors[p.getPlayerId()], p.getScoreLocation());
-		}
-
+		/** Lead phase **/
 		for (int i = 0; i < nbStartCards; i++) {
 			trick = new Hand(Cards.getDeck());
 			selected = null;
@@ -139,20 +145,24 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 			winningCard = selected;
 
 
-
+			/** Other players playing after lead**/
 			for (int j = 1; j < nbPlayers; j++) {
-				if (++nextPlayer >= nbPlayers) nextPlayer = 0;  // From last back to first
+				if (++nextPlayer >= nbPlayers) nextPlayer = 0;
 				selected = null;
-				// if (false) {
-				if (players.get(nextPlayer).getPlayerType().equals("human")) {  // Select lead depending on player type
+
+				/** Human player is taking their turn **/
+				if (players.get(nextPlayer).getPlayerType().equals("human")) {
 					players.get(nextPlayer).getHand().setTouchEnabled(true);
 					setStatus("Player " + nextPlayer + " double-click on card to lead.");
 					while (null == selected) delay(100);
+
+				/** NPC player using their determined playing strategy **/
 				} else {
 					setStatusText("Player " + nextPlayer + " thinking...");
 					delay(thinkingTime);
 					selected = Cards.randomCard(players.get(nextPlayer).getHand());
 				}
+
 				// Follow with selected card
 				trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
 				trick.draw();
@@ -190,16 +200,14 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 				}
 				// End Follow
 			}
+
 			delay(600);
 			trick.setView(this, new RowLayout(hideLocation, 0));
 			trick.draw();
 			nextPlayer = winner;
 			setStatusText("Player " + nextPlayer + " wins trick.");
 			players.get(nextPlayer).winTrick();
-			removeActor(scoreActors[nextPlayer]);
-			String text = "[" + String.valueOf(players.get(nextPlayer).getScore()) + "]" + String.valueOf(players.get(nextPlayer).getTrick()) + "/" + String.valueOf(players.get(nextPlayer).getBid());
-			scoreActors[players.get(nextPlayer).getPlayerId()] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-			addActor(scoreActors[players.get(nextPlayer).getPlayerId()], players.get(nextPlayer).getScoreLocation());
+			displayScores();
 			notifyPlayers("delete","trickCard",null);
 			notifyPlayers("delete","lead",null);
 		}

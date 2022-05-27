@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8e96bef4-b982-4481-80a0-d4615c1038c2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/oh_heaven/game/Oh_Heaven$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/oh_heaven/game/Oh_Heaven$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/oh_heaven/game/Oh_Heaven.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/oh_heaven/game/Oh_Heaven.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/oh_heaven/game/Cards.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/oh_heaven/game/Cards.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/oh_heaven/game/Oh_Heaven.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/oh_heaven/game/Oh_Heaven.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/oh_heaven/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/oh_heaven/game/Player.java" afterDir="false" />
     </list>
@@ -24,6 +20,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/oh_heaven/game/Oh_Heaven.java" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
