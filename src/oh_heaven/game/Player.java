@@ -1,22 +1,14 @@
 package oh_heaven.game;
 
 import ch.aplu.jcardgame.*;
-import ch.aplu.jgamegrid.*;
-import java.awt.Color;
-import java.awt.Font;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Player implements MyListener{
     private Hand hand;
     public final int madeBidBonus = 10;
-    private final int nbStartCards = 13;
     private int score;
     private int bid;
     private int trick;
-    private final Location scoreLocation;
-    private final Location handLocation;
-    private Actor scoreActor;
     private String playerType;
     private int playerId;
 
@@ -26,15 +18,9 @@ public class Player implements MyListener{
     private List<Card> curTrickCards;
 
 
-    public void setTrick(int trick) {
-        this.trick = trick;
-    }
-
-    public Player(int playerId, String playerType, Location scoreLocation, Location handLocation) {
-        this.scoreLocation = scoreLocation;
+    public Player(int playerId, String playerType) {
         this.playerId = playerId;
         this.playerType = playerType;
-        this.handLocation = handLocation;
         trick = 0;
         score = 0;
         bid = 0;
@@ -42,7 +28,7 @@ public class Player implements MyListener{
     }
 
     /** Bidding strategy can be changed and report MUST comment on it **/
-    public int makeBid() {
+    public int makeBid(int nbStartCards) {
         bid = nbStartCards / 4 + Oh_Heaven.random.nextInt(2);
         return bid;
     }
@@ -55,22 +41,6 @@ public class Player implements MyListener{
         }
     }
 
-    public int getTrick() {
-        return trick;
-    }
-
-    public int getBid() {
-        return bid;
-    }
-
-    public Location getScoreLocation() {
-        return scoreLocation;
-    }
-
-    public String getPlayerType() {
-        return playerType;
-    }
-
     public void updateScore() {
         score += trick;
         if (trick == bid){
@@ -80,22 +50,6 @@ public class Player implements MyListener{
 
     public void winTrick() {
         trick++;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public int getPlayerId() {
-        return playerId;
-    }
-
-    public Hand getHand() {
-        return hand;
-    }
-
-    public void setHand(Hand hand) {
-        this.hand = hand;
     }
 
     @Override
@@ -126,10 +80,40 @@ public class Player implements MyListener{
                     break;
             }
         }
-
     }
 
     //public abstract void playCard();
 
+    /** Getters and setters for Player class **/
+    public int getScore() {
+        return score;
+    }
 
+    public int getPlayerId() {
+        return playerId;
+    }
+
+    public Hand getHand() {
+        return hand;
+    }
+
+    public int getTrick() {
+        return trick;
+    }
+
+    public int getBid() {
+        return bid;
+    }
+
+    public String getPlayerType() {
+        return playerType;
+    }
+
+    public void setHand(Hand hand) {
+        this.hand = hand;
+    }
+
+    public void setTrick(int trick) {
+        this.trick = trick;
+    }
 }

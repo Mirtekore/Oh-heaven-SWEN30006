@@ -42,13 +42,13 @@ public class PropertiesLoader {
         return null;
     }
 
-    public static List<Player> loadPlayers(Properties properties, Location[] handLocations, Location[] scoreLocations, int playerCount) {
+    public static List<Player> loadPlayers(Properties properties, int playerCount) {
 
         List<Player> players = new ArrayList<>();
 
         for (int i = 0; i < playerCount; i++) {
             String playerType = properties.getProperty("players." + i);
-            players.add(new Player(i, playerType, scoreLocations[i], handLocations[i]));
+            players.add(new Player(i, playerType));
         }
 
         return players;

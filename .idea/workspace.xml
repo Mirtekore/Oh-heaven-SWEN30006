@@ -3,8 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="8e96bef4-b982-4481-80a0-d4615c1038c2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/oh_heaven/game/Oh_Heaven$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/oh_heaven/game/Oh_Heaven$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/oh_heaven/game/Oh_Heaven.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/oh_heaven/game/Oh_Heaven.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/oh_heaven/game/Oh_Heaven.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/oh_heaven/game/Oh_Heaven.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/oh_heaven/game/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/oh_heaven/game/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/oh_heaven/utility/PropertiesLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/oh_heaven/utility/PropertiesLoader.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

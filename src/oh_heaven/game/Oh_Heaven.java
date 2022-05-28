@@ -62,11 +62,13 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 	private Card selected;
 
 	private void displayScores() {
-		for (Player p: players) {
-			removeActor(scoreActors[p.getPlayerId()]);
-			String text = "[" + String.valueOf(p.getScore()) + "]" + String.valueOf(p.getTrick()) + "/" + String.valueOf(p.getBid());
-			scoreActors[p.getPlayerId()] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-			addActor(scoreActors[p.getPlayerId()], p.getScoreLocation());
+		for (int i = 0; i < nbPlayers; i++) {
+			if (scoreActors[i] != null) {
+				removeActor(scoreActors[i]);
+			}
+			String text = "[" + String.valueOf(players.get(i).getScore()) + "]" + String.valueOf(players.get(i).getTrick()) + "/" + String.valueOf(players.get(i).getBid());
+			scoreActors[i] = new TextActor(text, Color.WHITE, bgColor, bigFont);
+			addActor(scoreActors[i], scoreLocations[i]);
 		}
 	}
 
@@ -113,7 +115,7 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		/** Bidding phase **/
 		int total = 0;
 		for (int i = nextPlayer; i < nextPlayer + nbPlayers; i++) {
-			total += players.get(i % nbPlayers).makeBid();
+			total += players.get(i % nbPlayers).makeBid(nbStartCards);
 		}
 		if (total == nbStartCards) {  // Force last bid so not every bid possible
 			players.get((nextPlayer + nbPlayers) % nbPlayers).forceBid();
@@ -124,7 +126,6 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		for (int i = 0; i < nbStartCards; i++) {
 			trick = new Hand(Cards.getDeck());
 			selected = null;
-			System.out.println(players.get(nextPlayer).getPlayerType());
 			if (players.get(nextPlayer).getPlayerType().equals("human")) {  // Select lead depending on player type
 				players.get(nextPlayer).getHand().setTouchEnabled(true);
 				setStatus("Player " + nextPlayer + " double-click on card to lead.");
@@ -239,13 +240,10 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 
 		enforceRules =
 				properties.getProperty("enforceRules") != null && Boolean.parseBoolean(properties.getProperty("enforceRules"));
-		players = PropertiesLoader.loadPlayers(properties, handLocations, scoreLocations, nbPlayers);
+		players = PropertiesLoader.loadPlayers(properties, nbPlayers);
 
-		for (Player p: players) {
-			String text = "[" + String.valueOf(p.getScore()) + "]" + String.valueOf(p.getTrick()) + "/" + String.valueOf(p.getBid());
-			scoreActors[p.getPlayerId()] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-			addActor(scoreActors[p.getPlayerId()], p.getScoreLocation());
-		}
+		displayScores();
+
 		for (int i=0; i <nbRounds; i++) {
 			for (Player p: players) {
 				p.setTrick(0);
@@ -258,10 +256,8 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		}
 
 		int maxScore = 0;
+		displayScores();
 		for (Player p: players) {
-			String text = "[" + String.valueOf(p.getScore()) + "]" + String.valueOf(p.getTrick()) + "/" + String.valueOf(p.getBid());
-			scoreActors[p.getPlayerId()] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-			addActor(scoreActors[p.getPlayerId()], p.getScoreLocation());
 			if (p.getScore() > maxScore){
 				maxScore = p.getScore();
 			}
