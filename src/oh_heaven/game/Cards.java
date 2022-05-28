@@ -67,4 +67,23 @@ public class Cards {
 			}
 		}
 	}
+	public static boolean cardGreater(Card c1, Card c2, Suit trumps, Suit lead){
+		if(c1.getSuit()==trumps&&c2.getSuit()!=trumps){
+			return true;
+		}else if(c1.getSuit()==trumps&&c2.getSuit()!=trumps){
+			return rankGreater(c1,c2);
+		}else if(c1.getSuit()!= trumps&& c2.getSuit()==trumps){
+			return false;
+		}else{
+			if(c1.getSuit() == lead&&c2.getSuit()!=lead){
+				return true;
+			}else if(c1.getSuit()==lead&&c2.getSuit()==lead){
+				return rankGreater(c1,c2);
+			}else if(c1.getSuit()!=lead&&c2.getSuit()==lead){
+				return false;
+			}else {
+				return rankGreater(c1,c2);
+			}
+		}
+	}
 }

@@ -3,24 +3,25 @@ package oh_heaven.game;
 import ch.aplu.jcardgame.*;
 import java.util.*;
 
-public class Player implements MyListener{
+public abstract class Player implements MyListener{
     private Hand hand;
     public final int madeBidBonus = 10;
     private int score;
     private int bid;
     private int trick;
-    private String playerType;
+//    private String playerType;
     private int playerId;
 
     //add by Qinglin
-    private Cards.Suit curtrumps;
-    private Cards.Suit curlead;
-    private List<Card> curTrickCards;
+    protected Cards.Suit curtrumps;
+    protected Cards.Suit curlead;
+    protected List<Card> curTrickCards;
+    protected Card clicked;
 
 
-    public Player(int playerId, String playerType) {
+    public Player(int playerId) {
         this.playerId = playerId;
-        this.playerType = playerType;
+//        this.playerType = playerType;
         trick = 0;
         score = 0;
         bid = 0;
@@ -105,9 +106,9 @@ public class Player implements MyListener{
         return bid;
     }
 
-    public String getPlayerType() {
-        return playerType;
-    }
+//    public String getPlayerType() {
+//        return playerType;
+//    }
 
     public void setHand(Hand hand) {
         this.hand = hand;
@@ -115,5 +116,19 @@ public class Player implements MyListener{
 
     public void setTrick(int trick) {
         this.trick = trick;
+    }
+
+    public Card chooseACard(){return null;}
+
+    public void resetClickListener(){
+            CardListener cardListener = new CardAdapter()  // Human Player plays card
+            {
+                public void leftDoubleClicked(Card card) {
+                    clicked = card;
+                    hand.setTouchEnabled(false);
+                }
+            };
+            hand.addCardListener(cardListener);
+
     }
 }

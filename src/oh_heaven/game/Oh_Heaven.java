@@ -80,17 +80,17 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		Cards.dealingOut(players, nbStartCards);
 		for (Player p : players) {
 			p.getHand().sort(Hand.SortType.SUITPRIORITY, true);
-
+			p.resetClickListener();
 			// human reading part
 			/** Code will have to change to add listeners if is human player **/
-			CardListener cardListener = new CardAdapter()  // Human Player plays card
-			{
-				public void leftDoubleClicked(Card card) {
-					selected = card;
-					players.get(0).getHand().setTouchEnabled(false);
-				}
-			};
-			players.get(0).getHand().addCardListener(cardListener);
+//			CardListener cardListener = new CardAdapter()  // Human Player plays card
+//			{
+//				public void leftDoubleClicked(Card card) {
+//					selected = card;
+//					players.get(0).getHand().setTouchEnabled(false);
+//				}
+//			};
+//			players.get(0).getHand().addCardListener(cardListener);
 
 			RowLayout layout = new RowLayout(handLocations[counter], handWidth);
 			layout.setRotationAngle(90 * counter);
@@ -126,20 +126,19 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		for (int i = 0; i < nbStartCards; i++) {
 			trick = new Hand(Cards.getDeck());
 			selected = null;
-			if (players.get(nextPlayer).getPlayerType().equals("human")) {  // Select lead depending on player type
-				players.get(nextPlayer).getHand().setTouchEnabled(true);
+			if (players.get(nextPlayer).getClass()==HumanPlayer.class) {  // Select lead depending on player type
 				setStatus("Player " + nextPlayer + " double-click on card to lead.");
-				while (null == selected) delay(100);
+				selected = players.get(nextPlayer).chooseACard();
 			} else {
 				setStatusText("Player " + nextPlayer + " thinking...");
 				delay(thinkingTime);
-				selected = Cards.randomCard(players.get(nextPlayer).getHand());
+				selected = players.get(nextPlayer).chooseACard();
 			}
 			trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
 			trick.draw();
 			selected.setVerso(false);
 			lead = (Cards.Suit) selected.getSuit();
-			notifyPlayers("add","trikeCard",selected);
+			notifyPlayers("add","trickCard",selected);
 			notifyPlayers("add","lead",lead);
 			selected.transfer(trick, true); // transfer to trick (includes graphic effect)
 			winner = nextPlayer;
@@ -152,22 +151,21 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 				selected = null;
 
 				/** Human player is taking their turn **/
-				if (players.get(nextPlayer).getPlayerType().equals("human")) {
-					players.get(nextPlayer).getHand().setTouchEnabled(true);
+				if (players.get(nextPlayer).getClass()==HumanPlayer.class) {
 					setStatus("Player " + nextPlayer + " double-click on card to lead.");
-					while (null == selected) delay(100);
+					selected = players.get(nextPlayer).chooseACard();
 
 				/** NPC player using their determined playing strategy **/
 				} else {
 					setStatusText("Player " + nextPlayer + " thinking...");
 					delay(thinkingTime);
-					selected = Cards.randomCard(players.get(nextPlayer).getHand());
+					selected = players.get(nextPlayer).chooseACard();
 				}
 
 				// Follow with selected card
 				trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
 				trick.draw();
-				notifyPlayers("add","trikeCard",selected);
+				notifyPlayers("add","trickCard",selected);
 				selected.setVerso(false);  // In case it is upside down
 
 				// Check: Following card must follow suit if possible

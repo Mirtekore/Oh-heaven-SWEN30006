@@ -48,7 +48,7 @@ public class PropertiesLoader {
 
         for (int i = 0; i < playerCount; i++) {
             String playerType = properties.getProperty("players." + i);
-            players.add(new Player(i, playerType));
+            players.add(PlayerFactory.getInstance().createNewPlayer(i,playerType));
         }
 
         return players;

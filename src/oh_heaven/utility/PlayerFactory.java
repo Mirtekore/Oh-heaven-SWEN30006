@@ -1,6 +1,6 @@
 package oh_heaven.utility;
 
-import oh_heaven.game.Player;
+import oh_heaven.game.*;
 
 public class PlayerFactory {
     private static PlayerFactory instance;
@@ -11,14 +11,30 @@ public class PlayerFactory {
         }
         return instance;
     }
+    public Player createNewPlayer(int id, String type){
+        if(type.equals("smart")){
+            return createSmartPlayer(id);
+        }else if(type.equals("legal")){
+            return createLegalPlayer(id);
+        }else if(type.equals("human")){
+            return createHumanPlayer(id);
+        }else if(type.equals("random")){
+            return createRandomPlayer(id);
+        }
+        //maybe I need to throw an exception if no type match?
+        return null;
+    }
 
-//    public Player createSmartPlayer(){
-//
-//    }
-//    public Player createLegalPlayer(){
-//
-//    }
-//    public Player createHumanPlayer(){
-//
-//    }
+    private SmartPlayer createSmartPlayer(int id){
+        return new SmartPlayer(id);
+    }
+    private LegalPlayer createLegalPlayer(int id){
+        return new LegalPlayer(id);
+    }
+    private HumanPlayer createHumanPlayer(int id){
+        return new HumanPlayer(id);
+    }
+    private RandomPlayer createRandomPlayer(int id){
+        return new RandomPlayer(id);
+    }
 }
