@@ -5,35 +5,30 @@ import java.util.*;
 
 public abstract class Player implements MyListener{
     private Hand hand;
-    public final int madeBidBonus = 10;
     private int score;
     private int bid;
     private int trick;
-//    private String playerType;
     private int playerId;
 
-    //add by Qinglin
-    protected Cards.Suit curtrumps;
-    protected Cards.Suit curlead;
+    protected Cards.Suit curTrumps;
+    protected Cards.Suit curLead;
     protected List<Card> curTrickCards;
     protected Card clicked;
 
-
     public Player(int playerId) {
-        this.playerId = playerId;
-//        this.playerType = playerType;
         trick = 0;
         score = 0;
         bid = 0;
+        this.playerId = playerId;
         this.curTrickCards = new ArrayList<>();
     }
 
-    /** Bidding strategy can be changed and report MUST comment on it **/
     public int makeBid(int nbStartCards) {
         bid = nbStartCards / 4 + Oh_Heaven.random.nextInt(2);
         return bid;
     }
 
+    /** Player must change their bid to follow the bidding rules **/
     public void forceBid(){
         if (bid == 0) {
             bid = 1;
@@ -42,30 +37,20 @@ public abstract class Player implements MyListener{
         }
     }
 
-    public void updateScore() {
-        score += trick;
-        if (trick == bid){
-            score += madeBidBonus;
-        }
-    }
-
-    public void winTrick() {
-        trick++;
-    }
-
+    /** Track information such as the cards played by other players
+     *  smart and legal players will utilize this information **/
     @Override
     public void update(String mode, String feature, Object arg){
-//        System.out.println(mode+"  "+feature);
         if(mode.equals("add")){
             switch (feature){
                 case "trickCard":
                     this.curTrickCards.add((Card) arg);
                     break;
                 case "trumps":
-                    this.curtrumps = (Cards.Suit) arg;
+                    this.curTrumps = (Cards.Suit) arg;
                     break;
                 case "lead":
-                    this.curlead = (Cards.Suit) arg;
+                    this.curLead = (Cards.Suit) arg;
                     break;
             }
         }else if(mode.equals("delete")){
@@ -74,16 +59,30 @@ public abstract class Player implements MyListener{
                     this.curTrickCards = new ArrayList<>();
                     break;
                 case "trumps":
-                    this.curtrumps = null;
+                    this.curTrumps = null;
                     break;
                 case "lead":
-                    this.curlead = null;
+                    this.curLead = null;
                     break;
             }
         }
     }
 
-    //public abstract void playCard();
+    /** Algorithm for choosing a card depending on player **/
+    public abstract Card chooseACard();
+
+    /** GUI interfaces **/
+    public void resetClickListener(){
+        CardListener cardListener = new CardAdapter()  // Human Player plays card
+        {
+            public void leftDoubleClicked(Card card) {
+                clicked = card;
+                hand.setTouchEnabled(false);
+            }
+        };
+        hand.addCardListener(cardListener);
+
+    }
 
     /** Getters and setters for Player class **/
     public int getScore() {
@@ -106,10 +105,6 @@ public abstract class Player implements MyListener{
         return bid;
     }
 
-//    public String getPlayerType() {
-//        return playerType;
-//    }
-
     public void setHand(Hand hand) {
         this.hand = hand;
     }
@@ -118,17 +113,7 @@ public abstract class Player implements MyListener{
         this.trick = trick;
     }
 
-    public Card chooseACard(){return null;}
-
-    public void resetClickListener(){
-            CardListener cardListener = new CardAdapter()  // Human Player plays card
-            {
-                public void leftDoubleClicked(Card card) {
-                    clicked = card;
-                    hand.setTouchEnabled(false);
-                }
-            };
-            hand.addCardListener(cardListener);
-
+    public void setScore(int score) {
+        this.score = score;
     }
 }

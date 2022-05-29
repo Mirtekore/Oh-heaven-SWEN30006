@@ -11,6 +11,8 @@ public class PlayerFactory {
         }
         return instance;
     }
+
+    /** Creates players based on the NPC type of property file **/
     public Player createNewPlayer(int id, String type){
         if(type.equals("smart")){
             return createSmartPlayer(id);
@@ -21,7 +23,6 @@ public class PlayerFactory {
         }else if(type.equals("random")){
             return createRandomPlayer(id);
         }
-        //maybe I need to throw an exception if no type match?
         return null;
     }
 

@@ -1,6 +1,5 @@
 package oh_heaven.game;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import ch.aplu.jcardgame.Card;
@@ -8,65 +7,57 @@ import ch.aplu.jcardgame.Deck;
 import ch.aplu.jcardgame.Hand;
 
 public class Cards {
-	
-		// Note: Card class already exists
-		// Hence this class has card related functions and variables
-	  public enum Suit
-	  {
-	    SPADES, HEARTS, DIAMONDS, CLUBS
-	  }
 
-	  public enum Rank
-	  {
-	    // Reverse order of rank importance (see rankGreater() below)
-		// Order of cards is tied to card images
+	private static final Deck deck = new Deck(Suit.values(), Rank.values(), "cover");
+
+	/** Card class already provided in jcardgame **/
+	public enum Suit
+	{
+		SPADES, HEARTS, DIAMONDS, CLUBS
+	}
+
+	public enum Rank
+	{
 		ACE, KING, QUEEN, JACK, TEN, NINE, EIGHT, SEVEN, SIX, FIVE, FOUR, THREE, TWO
-	  }
+	}
 	  
-	  final static String trumpImage[] = {"bigspade.gif","bigheart.gif","bigdiamond.gif","bigclub.gif"};
+	final static String trumpImage[] = {"bigspade.gif","bigheart.gif","bigdiamond.gif","bigclub.gif"};
 	  
-	  // return random Enum value
-	  public static <T extends Enum<?>> T randomEnum(Class<T> clazz){
-	      int x = Oh_Heaven.random.nextInt(clazz.getEnumConstants().length);
-	      return clazz.getEnumConstants()[x];
-	  }
+	/** return random Enum value **/
+	public static <T extends Enum<?>> T randomEnum(Class<T> clazz){
+		int x = Oh_Heaven.random.nextInt(clazz.getEnumConstants().length);
+		return clazz.getEnumConstants()[x];
+	}
 	  
-	  // return random Card from Hand
-	  public static Card randomCard(Hand hand){
-	      int x = Oh_Heaven.random.nextInt(hand.getNumberOfCards());
-	      return hand.get(x);
-	  }
-	 
-	  // return random Card from ArrayList
-	  public static Card randomCard(ArrayList<Card> list){
-	      int x = Oh_Heaven.random.nextInt(list.size());
-	      return list.get(x);
-	  }
-	  
-	  public static boolean rankGreater(Card card1, Card card2) {
-		  return card1.getRankId() < card2.getRankId(); // Warning: Reverse rank order of cards (see comment on enum)
-	  }
-	  
-	  private static final Deck deck = new Deck(Suit.values(), Rank.values(), "cover");
-	  
-	  public static Deck getDeck() {
-		  return deck;
-	  }
+	/** return random Card from Hand **/
+	public static Card randomCard(Hand hand){
+		int x = Oh_Heaven.random.nextInt(hand.getNumberOfCards());
+		return hand.get(x);
+	}
 
+	/** Ranks the card **/
+	public static boolean rankGreater(Card card1, Card card2) {
+		return card1.getRankId() < card2.getRankId();
+	}
+	  
+	public static Deck getDeck() {
+		return deck;
+	}
+
+	/** Gives each player a unique set of cards **/
 	public static void dealingOut(List<Player> players, int nbCardsPerPlayer) {
 		Hand pack = deck.toHand(false);
-		// pack.setView(Oh_Heaven.this, new RowLayout(hideLocation, 0));
 		for (int i = 0; i < nbCardsPerPlayer; i++) {
 			for (Player p: players) {
 				if (pack.isEmpty()) return;
 				Card dealt = randomCard(pack);
-				// System.out.println("Cards = " + dealt);
 				dealt.removeFromHand(false);
 				p.getHand().insert(dealt, false);
-				// dealt.transfer(hands[j], true);
 			}
 		}
 	}
+
+	/** Compare value of a card, factoring the lead suit and trump suit**/
 	public static boolean cardGreater(Card c1, Card c2, Suit trumps, Suit lead){
 		if(c1.getSuit()==trumps&&c2.getSuit()!=trumps){
 			return true;

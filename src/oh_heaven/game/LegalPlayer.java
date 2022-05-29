@@ -9,14 +9,17 @@ public class LegalPlayer extends Player{
     public LegalPlayer(int playerId) {
         super(playerId);
     }
+
+    /** Chooses cards that will follow the lead suit when possible
+     *  chooses random cards when there is no lead suit / does not have cards of the lead suit**/
     @Override
-    public Card chooseACard(){
+    public Card chooseACard() {
         List<Card> legalCards = new ArrayList<>();
-        if(curlead==null){
+        if(curLead==null) {
             legalCards = getHand().getCardList();
-        }else {
+        } else {
             for(Card c : getHand().getCardList()){
-                if(c.getSuit() == curlead){
+                if(c.getSuit() == curLead){
                     legalCards.add(c);
                 }
             }
@@ -26,7 +29,6 @@ public class LegalPlayer extends Player{
         }
         int x = Oh_Heaven.random.nextInt(legalCards.size());
         return legalCards.get(x);
-
 
     }
 }

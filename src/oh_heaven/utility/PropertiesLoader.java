@@ -1,8 +1,7 @@
+/** This class is adapted from PropertiesLoader class provided in SWEN30006 SnakeAndLaddersOnAPlane project **/
 package oh_heaven.utility;
 
-import ch.aplu.jgamegrid.Location;
 import oh_heaven.game.Player;
-/** This class is adapted from PropertiesLoader class provided in SWEN30006 SnakeAndLaddersOnAPlane project **/
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +17,6 @@ public class PropertiesLoader {
 
                 Properties prop = new Properties();
 
-                // load a properties file
                 prop.load(input);
 
                 propertiesFile = DEFAULT_DIRECTORY_PATH + prop.getProperty("current_mode");
@@ -32,7 +30,6 @@ public class PropertiesLoader {
 
             Properties prop = new Properties();
 
-            // load a properties file
             prop.load(input);
 
             return prop;
@@ -42,6 +39,7 @@ public class PropertiesLoader {
         return null;
     }
 
+    /** Reads the types of players from property file and uses a Factory to create them **/
     public static List<Player> loadPlayers(Properties properties, int playerCount) {
 
         List<Player> players = new ArrayList<>();

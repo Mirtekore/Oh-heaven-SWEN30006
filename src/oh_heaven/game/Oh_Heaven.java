@@ -14,29 +14,23 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class Oh_Heaven extends CardGame implements MyPublisher{
 
+    /** Attributes related to how the game works **/
 	private Properties properties;
-	public final int nbPlayers = 4;
-	public final int nbStartCards;
-	public final int nbRounds;
+	private int nbStartCards;
+	private int nbRounds;
 	private boolean enforceRules;
 	static public int seed;
-	static final Random random = new Random(seed);
+	static public final Random random = new Random(seed);
 	private List<Player> players;
+    private Card selected;
+	private final int nbPlayers = 4;
+	public final int madeBidBonus = 10;
 
+	/** Attributes related to displaying graphical interfaces **/
 	private final String version = "1.0";
 	private final int handWidth = 400;
 	private final int trickWidth = 40;
-	
-	/** Redundant variables from original code **/
-	public final int madeBidBonus = 10;
-	private Hand[] hands;
-	private int[] scores = new int[nbPlayers];
-	private int[] tricks = new int[nbPlayers];
-	private int[] bids = new int[nbPlayers];
-	
-
-
-	private final Location[] handLocations = {
+		private final Location[] handLocations = {
 			new Location(350, 625),
 			new Location(75, 350),
 			new Location(350, 75),
@@ -46,7 +40,6 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 			new Location(575, 675),
 			new Location(25, 575),
 			new Location(575, 25),
-			// new Location(650, 575)
 			new Location(575, 575)
 	};
 	private Actor[] scoreActors = {null, null, null, null };
@@ -56,20 +49,28 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 	private Location hideLocation = new Location(-500, - 500);
 	private Location trumpsActorLocation = new Location(50, 50);
 	public void setStatus(String string) { setStatusText(string); }
-
 	Font bigFont = new Font("Serif", Font.BOLD, 36);
 
-	private Card selected;
+	private List<Player> initGameProperties(Properties properties){
+		nbRounds =
+				(properties.getProperty("rounds") == null)
+						? 2
+						: Integer.parseInt(properties.getProperty("rounds"));
 
-	private void displayScores() {
-		for (int i = 0; i < nbPlayers; i++) {
-			if (scoreActors[i] != null) {
-				removeActor(scoreActors[i]);
-			}
-			String text = "[" + String.valueOf(players.get(i).getScore()) + "]" + String.valueOf(players.get(i).getTrick()) + "/" + String.valueOf(players.get(i).getBid());
-			scoreActors[i] = new TextActor(text, Color.WHITE, bgColor, bigFont);
-			addActor(scoreActors[i], scoreLocations[i]);
-		}
+		nbStartCards =
+				(properties.getProperty("nbStartCards") == null)
+						? 13
+						: Integer.parseInt(properties.getProperty("nbStartCards"));
+
+		seed =
+				(properties.getProperty("seed") == null)
+						? 30006
+						: Integer.parseInt(properties.getProperty("seed"));
+
+		enforceRules =
+				properties.getProperty("enforceRules") != null && Boolean.parseBoolean(properties.getProperty("enforceRules"));
+
+		return PropertiesLoader.loadPlayers(properties, nbPlayers);
 	}
 
 	private void initRound() {
@@ -81,16 +82,6 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		for (Player p : players) {
 			p.getHand().sort(Hand.SortType.SUITPRIORITY, true);
 			p.resetClickListener();
-			// human reading part
-			/** Code will have to change to add listeners if is human player **/
-//			CardListener cardListener = new CardAdapter()  // Human Player plays card
-//			{
-//				public void leftDoubleClicked(Card card) {
-//					selected = card;
-//					players.get(0).getHand().setTouchEnabled(false);
-//				}
-//			};
-//			players.get(0).getHand().addCardListener(cardListener);
 
 			RowLayout layout = new RowLayout(handLocations[counter], handWidth);
 			layout.setRotationAngle(90 * counter);
@@ -138,6 +129,8 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 			trick.draw();
 			selected.setVerso(false);
 			lead = (Cards.Suit) selected.getSuit();
+
+			/** Update players of the card that the leader played **/
 			notifyPlayers("add","trickCard",selected);
 			notifyPlayers("add","lead",lead);
 			selected.transfer(trick, true); // transfer to trick (includes graphic effect)
@@ -162,15 +155,14 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 					selected = players.get(nextPlayer).chooseACard();
 				}
 
-				// Follow with selected card
+				/** Graphics rendering **/
 				trick.setView(this, new RowLayout(trickLocation, (trick.getNumberOfCards()+2)*trickWidth));
 				trick.draw();
 				notifyPlayers("add","trickCard",selected);
-				selected.setVerso(false);  // In case it is upside down
+				selected.setVerso(false);
 
-				// Check: Following card must follow suit if possible
+				/** Checking for rule violations **/
 				if (selected.getSuit() != lead && players.get(nextPlayer).getHand().getNumberOfCardsWithSuit(lead) > 0) {
-					// Rule violation
 					String violation = "Follow rule broken by player " + nextPlayer + " attempting to play " + selected;
 					System.out.println(violation);
 					if (enforceRules)
@@ -182,31 +174,32 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 							System.exit(0);
 						}
 				}
-				// End Check
 
-				selected.transfer(trick, true); // transfer to trick (includes graphic effect)
+
+				selected.transfer(trick, true);
 				System.out.println("winning: " + winningCard);
 				System.out.println(" played: " + selected);
-				// System.out.println("winning: suit = " + winningCard.getSuit() + ", rank = " + (13 - winningCard.getRankId()));
-				// System.out.println(" played: suit = " +    selected.getSuit() + ", rank = " + (13 -    selected.getRankId()));
-				if ( // beat current winner with higher card
+
+				/** Compare the card values played **/
+				if (
 						(selected.getSuit() == winningCard.getSuit() && Cards.rankGreater(selected, winningCard)) ||
-								// trumped when non-trump was winning
 								(selected.getSuit() == trumps && winningCard.getSuit() != trumps)) {
 					System.out.println("NEW WINNER");
 					winner = nextPlayer;
 					winningCard = selected;
 				}
-				// End Follow
 			}
 
+			/** Graphics rendering **/
 			delay(600);
 			trick.setView(this, new RowLayout(hideLocation, 0));
 			trick.draw();
 			nextPlayer = winner;
 			setStatusText("Player " + nextPlayer + " wins trick.");
-			players.get(nextPlayer).winTrick();
+			players.get(nextPlayer).setTrick(players.get(nextPlayer).getTrick() + 1);
 			displayScores();
+
+			/** Update players that turn of a round is finished **/
 			notifyPlayers("delete","trickCard",null);
 			notifyPlayers("delete","lead",null);
 		}
@@ -214,6 +207,35 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		removeActor(trumpsActor);
 	}
 
+	/**	observer pattern**/
+	@Override
+	public void notifyPlayers(String mode, String feature, Object arg){
+		for(Player p:players){
+			p.update(mode, feature, arg);
+		}
+	}
+
+	/** Graphics rendering of score **/
+	private void displayScores() {
+		for (int i = 0; i < nbPlayers; i++) {
+			if (scoreActors[i] != null) {
+				removeActor(scoreActors[i]);
+			}
+			String text = "[" + String.valueOf(players.get(i).getScore()) + "]" + String.valueOf(players.get(i).getTrick()) + "/" + String.valueOf(players.get(i).getBid());
+			scoreActors[i] = new TextActor(text, Color.WHITE, bgColor, bigFont);
+			addActor(scoreActors[i], scoreLocations[i]);
+		}
+	}
+
+	/** Calculate the score at the end of each round **/
+	private void calculateScore(){
+		for (Player p : players) {
+			p.setScore(p.getScore() + p.getTrick());
+			if (p.getTrick() == p.getBid()) {
+				p.setScore(p.getScore() + madeBidBonus);
+			}
+		}
+	}
 
 	public Oh_Heaven(Properties properties)
 	{
@@ -221,25 +243,7 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		setTitle("Oh_Heaven (V" + version + ") Constructed for UofM SWEN30006 with JGameGrid (www.aplu.ch)");
 		setStatusText("Initializing...");
 		this.properties = properties;
-		nbRounds =
-				(properties.getProperty("rounds") == null)
-						? 2
-						: Integer.parseInt(properties.getProperty("rounds"));
-
-		nbStartCards =
-				(properties.getProperty("nbStartCards") == null)
-						? 13
-						: Integer.parseInt(properties.getProperty("nbStartCards"));
-
-		seed =
-				(properties.getProperty("seed") == null)
-						? 30006
-						: Integer.parseInt(properties.getProperty("seed"));
-
-		enforceRules =
-				properties.getProperty("enforceRules") != null && Boolean.parseBoolean(properties.getProperty("enforceRules"));
-		players = PropertiesLoader.loadPlayers(properties, nbPlayers);
-
+		players = initGameProperties(properties);
 		displayScores();
 
 		for (int i=0; i <nbRounds; i++) {
@@ -248,11 +252,10 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 			}
 			initRound();
 			playRound();
-			for (Player p: players) {
-				p.updateScore();
-			}
+			calculateScore();
 		}
 
+		/** Find the highest scoring winner **/
 		int maxScore = 0;
 		displayScores();
 		for (Player p: players) {
@@ -278,17 +281,8 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		refresh();
 	}
 
-	/**	observer pattern**/
-	@Override
-	public void notifyPlayers(String mode, String feature, Object arg){
-		for(Player p:players){
-			p.update(mode, feature, arg);
-		}
-	}
-
 	public static void main(String[] args)
 	{
-		// System.out.println("Working Directory = " + System.getProperty("user.dir"));
 		final Properties properties;
 		if (args == null || args.length == 0) {
 			properties = PropertiesLoader.loadPropertiesFile(null);
@@ -297,5 +291,4 @@ public class Oh_Heaven extends CardGame implements MyPublisher{
 		}
 		new Oh_Heaven(properties);
 	}
-
 }

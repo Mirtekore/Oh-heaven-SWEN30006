@@ -9,6 +9,7 @@ public class HumanPlayer extends Player{
         super(playerId);
     }
 
+    /** Card chosen based on what the player clicked on **/
     @Override
     public Card chooseACard(){
         clicked = null;
